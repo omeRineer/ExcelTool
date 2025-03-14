@@ -35,10 +35,9 @@ namespace Utilities.Helpers
             property.SetValue(obj, value, null);
         }
 
-        public static List<string> GetPropertiesName(Type type, bool isNested = false)
+        public static List<Property> GetProperties(Type type, bool isNested = false)
         {
-            var propertyNames = new List<string>();
-
+            var propertyList = new List<Property>();
             var properties = type.GetProperties();
 
             foreach (var property in properties)
@@ -47,23 +46,56 @@ namespace Utilities.Helpers
 
                 if (propertyType.IsClass && propertyType != typeof(string))
                 {
-                    var nestedPropertyNames = GetPropertiesName(propertyType, true).Select(nestedPropertyName =>
+                    var nestedPropertyNames = GetProperties(propertyType, true).Select(nestedProperty =>
                     {
-                        return isNested ? $"{type.Name}.{nestedPropertyName}" : $"{nestedPropertyName}";
+                        var fullName = isNested ? $"{type.Name}.{nestedProperty}"
+                                                : $"{nestedProperty}";
+
+                        return new Property { FullName = fullName, Info = nestedProperty.Info };
                     });
-                    propertyNames.AddRange(nestedPropertyNames);
+                    propertyList.AddRange(nestedPropertyNames);
                 }
                 else
                 {
+                    var item = new Property { Info = property };
+
                     if (isNested && type.IsClass && type != typeof(string))
-                        propertyNames.Add($"{type.Name}.{property.Name}");
+                        item.FullName = $"{type.Name}.{property.Name}";
                     else
-                        propertyNames.Add(property.Name);
+                        item.FullName = property.Name;
+
+                    propertyList.Add(item);
                 }
 
             }
 
-            return propertyNames;
+            return propertyList;
         }
+        public static Property GetProperty(Type type, string propertyPath)
+        {
+            string[] properties = propertyPath.Split('.');
+            Property result = new Property
+            {
+                FullName = propertyPath
+            };
+
+            foreach (var property in properties)
+            {
+                result.Info = type.GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+                if (result.Info == null)
+                    throw new ArgumentException($"'{property}' is not a property of '{type.Name}'");
+
+                type = result.Info.PropertyType;
+            }
+
+            return result;
+        }
+    }
+
+    public class Property
+    {
+        public string FullName { get; set; }
+        public PropertyInfo Info { get; set; }
     }
 }

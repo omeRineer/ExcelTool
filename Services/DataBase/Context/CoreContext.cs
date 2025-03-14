@@ -27,7 +27,8 @@ namespace Services.DataBase.Context
         {
             IQueryable<T> query = Set<T>();
 
-            if(queryModel.Filter != null) query = query.Where(queryModel.Filter);
+            if(queryModel.Filter?.FilterObjects != null) query = query.Where(queryModel.Filter);
+            if(queryModel.Filter?.SortObjects != null) query = query.OrderBy(queryModel.Filter);
 
             foreach (var include in includes)
                 query = query.Include(include);

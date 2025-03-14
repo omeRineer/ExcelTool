@@ -33,7 +33,7 @@ namespace Services.Concrete
             Context = context;
         }
 
-        public void ImportByFile(string entityType, IFormFile file)
+        public void Import(string entityType, IFormFile file)
         {
             var schemaData = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == entityType);
             var excelSchema = JsonConvert.DeserializeObject<ExcelImportSchema>(schemaData.Schema);
@@ -58,7 +58,7 @@ namespace Services.Concrete
             Context.SaveChanges();
         }
 
-        public Stream ExportToFile(string entityType, ExportDataQueryModel query)
+        public Stream Export(string entityType, ExportDataQueryModel query)
         {
             var excelSchema = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == entityType);
             var schema = JsonConvert.DeserializeObject<ExcelExportSchema>(excelSchema.Schema);

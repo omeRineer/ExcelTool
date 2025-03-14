@@ -10,7 +10,7 @@ namespace Services.Concrete
 {
     public interface IExcelService
     {
-        Stream ExportToFile(string entityType, ExportDataQueryModel query);
-        void ImportByFile(string entityType, IFormFile file);
+        Stream Export(string entityType, ExportDataQueryModel query);
+        void Import(string entityType, IFormFile file);
     }
 }
