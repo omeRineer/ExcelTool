@@ -1,0 +1,24 @@
+{
+  "CellColor": null,
+  "Includes": [
+    "Category"
+  ],
+  "Columns": [
+    {
+      "Name": "İsim",
+      "Property": "Name"
+    },
+    {
+      "Name": "Kategori",
+      "Property": "Category.Name"
+    },
+    {
+      "Name": "Fiyat",
+      "Property": "Price"
+    },
+    {
+      "Name": "Miktar",
+      "Property": "Quantity"
+    }
+  ]
+}

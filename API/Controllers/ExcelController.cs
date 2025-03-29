@@ -23,18 +23,18 @@ namespace API.Controllers
             _excelService = excelService;
         }
 
-        [HttpPost("ExportToFile/{entityType}")]
-        public async Task<IActionResult> ExportToFile([FromRoute] string entityType, [FromBody]ExportDataQueryModel query)
+        [HttpPost("Export/{key}")]
+        public async Task<IActionResult> Export([FromRoute] string key, [FromBody]ExportDataQueryModel query)
         {
-            var file = _excelService.Export(entityType, query);
+            var file = _excelService.Export(key, query);
 
-            return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{entityType} List.xlsx");
+            return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key} List.xlsx");
         }
 
-        [HttpPost("ImportFile/{entityType}")]
-        public async Task<IActionResult> ImportFile([FromRoute] string entityType, IFormFile file)
+        [HttpPost("Import/{key}")]
+        public async Task<IActionResult> Import([FromRoute] string key, IFormFile file)
         {
-            _excelService.Import(entityType, file);
+            _excelService.Import(key, file);
 
             return Ok();
         }

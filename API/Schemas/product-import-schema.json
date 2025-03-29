@@ -1,0 +1,20 @@
+{
+  "Columns": [
+    {
+      "Name": "İsim",
+      "Property": "Name"
+    },
+    {
+      "Name": "Kategori",
+      "Property": "CategoryId"
+    },
+    {
+      "Name": "Fiyat",
+      "Property": "Price"
+    },
+    {
+      "Name": "Miktar",
+      "Property": "Quantity"
+    }
+  ]
+}

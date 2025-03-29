@@ -33,13 +33,13 @@ namespace Services.Concrete
             Context = context;
         }
 
-        public void Import(string entityType, IFormFile file)
+        public void Import(string key, IFormFile file)
         {
-            var schemaData = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == entityType);
+            var schemaData = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == key);
             var excelSchema = JsonConvert.DeserializeObject<ExcelImportSchema>(schemaData.Schema);
 
             var dataCollection = ConvertToDictionary(file.OpenReadStream());
-            var dataType = GetDataType(entityType);
+            var dataType = GetDataType(schemaData.Object);
 
             foreach (var row in dataCollection)
             {
@@ -58,16 +58,16 @@ namespace Services.Concrete
             Context.SaveChanges();
         }
 
-        public Stream Export(string entityType, ExportDataQueryModel query)
+        public Stream Export(string key, ExportDataQueryModel query)
         {
-            var excelSchema = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == entityType);
+            var excelSchema = Context.Set<ExcelSchema>().FirstOrDefault(f => f.Key == key);
             var schema = JsonConvert.DeserializeObject<ExcelExportSchema>(excelSchema.Schema);
-            Type type = GetDataType(entityType);
+            Type type = GetDataType(excelSchema.Object);
             var data = GetDataWithDynamic(type, schema, query);
 
             using (var excelPackage = new ExcelPackage())
             {
-                var sheet = excelPackage.Workbook.Worksheets.Add($"{entityType} List");
+                var sheet = excelPackage.Workbook.Worksheets.Add($"{excelSchema.Object} List");
 
                 for (int i = 1; i <= schema?.Columns?.Count; i++)
                 {

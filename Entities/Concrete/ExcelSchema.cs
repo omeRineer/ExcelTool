@@ -8,6 +8,7 @@ namespace Entities.Concrete
 {
     public class ExcelSchema : BaseEntity
     {
+        public string Object { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Key { get; set; }
