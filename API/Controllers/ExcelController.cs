@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using Newtonsoft.Json;
 using OfficeOpenXml;
-using Services.Concrete;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Models.ExcelModels;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Services.Abstract;
 
 namespace API.Controllers
 {
@@ -24,17 +24,17 @@ namespace API.Controllers
         }
 
         [HttpPost("Export/{key}")]
-        public async Task<IActionResult> Export([FromRoute] string key, [FromBody]ExportDataQueryModel query)
+        public async Task<IActionResult> ExportAsync([FromRoute] string key, [FromBody]ExportDataQueryModel query)
         {
-            var file = _excelService.Export(key, query);
+            var file = await _excelService.ExportAsync(key, query);
 
             return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key} List.xlsx");
         }
 
         [HttpPost("Import/{key}")]
-        public async Task<IActionResult> Import([FromRoute] string key, IFormFile file)
+        public async Task<IActionResult> ImportAsync([FromRoute] string key, IFormFile file)
         {
-            _excelService.Import(key, file);
+            await _excelService.ImportAsync(key, file);
 
             return Ok();
         }

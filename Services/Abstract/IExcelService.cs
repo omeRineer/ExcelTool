@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.Concrete
+namespace Services.Abstract
 {
     public interface IExcelService
     {
-        Stream Export(string key, ExportDataQueryModel query);
-        void Import(string key, IFormFile file);
+        Task<Stream> ExportAsync(string key, ExportDataQueryModel query);
+        Task ImportAsync(string key, IFormFile file);
     }
 }

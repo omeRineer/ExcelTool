@@ -14,9 +14,8 @@ namespace Models.ExpressionModels
 
     public class FilterObject
     {
-        public string Field { get; init; }
+        public string Condition { get; init; }
         public string Operator { get; init; }
-        public string Value { get; init; }
     }
 
     public class SortObject

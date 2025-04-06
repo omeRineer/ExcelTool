@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities.Helpers;
@@ -20,7 +21,7 @@ namespace Utilities.Extensions
 
             foreach (var filterObject in queryModel.FilterObjects)
             {
-                var memberExpression = GetNestedPropertyExpression(parameter, filterObject.Field);
+                var memberExpression = GetNestedPropertyExpression(parameter, filterObject.Condition);
                 var condition = CreateCondition(memberExpression, filterObject.Value, filterObject.Operator);
 
                 filterQuery = filterQuery == null ? condition
@@ -61,11 +62,21 @@ namespace Utilities.Extensions
         #region Private
         static MemberExpression GetNestedPropertyExpression(ParameterExpression parameter, string propertyPath)
         {
-            string[] properties = propertyPath.Split('.');
-            Expression expression = parameter;
+            var operators = new string[]
+            {
+                "==", "!=", ">", ">=", "<", "<="
+            };
+            var conditionItems = propertyPath.Split(new string[] { "&&", "||" }, StringSplitOptions.TrimEntries);
 
-            foreach (var property in properties)
-                expression = Expression.PropertyOrField(expression, property);
+            foreach (var conditionItem in conditionItems)
+            {
+                string[] properties = conditionItem.Split('.');
+                Expression expression = parameter;
+
+                foreach (var property in properties)
+                    expression = Expression.PropertyOrField(expression, property);
+            }
+            
 
             return (MemberExpression)expression;
         }
@@ -83,6 +94,8 @@ namespace Utilities.Extensions
                 ">=" => Expression.GreaterThanOrEqual(property, constant),
                 "<" => Expression.LessThan(property, constant),
                 "<=" => Expression.LessThanOrEqual(property, constant),
+                "&&" => Expression.AndAlso(property, constant),
+                "||" => Expression.Or(property, constant),
 
                 _ => throw new NotSupportedException($"Opr ({opr}) is not avaible")
             };
