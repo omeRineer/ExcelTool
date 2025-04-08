@@ -9,7 +9,7 @@ namespace Adapters
 {
     public interface IExcelAdapter
     {
-        Stream Create(IList<KeyValuePair<string, string>> columns, 
+        Task<Stream> CreateAsync(IList<KeyValuePair<string, string>> columns, 
                       IList<object> data, 
                       SchemaOptions options = null);
         IList<Dictionary<string, object>> ConvertToDictionary(Stream stream);

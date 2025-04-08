@@ -46,7 +46,7 @@ namespace Services.Concrete
 
             foreach (var row in dataCollection)
             {
-                var instance = (ExcelSchema) Activator.CreateInstance(type);
+                var instance = Activator.CreateInstance(type);
 
                 foreach (var column in schema.Columns)
                 {
@@ -64,11 +64,11 @@ namespace Services.Concrete
         public async Task<Stream> ExportAsync(string key, ExportDataQueryModel query)
         {
             var excelSchema = await _excelSchemaService.GetExcelSchemaAsync(key);
-            var schema = JsonConvert.DeserializeObject<ExcelExportSchema>(excelSchema.Object);
+            var schema = JsonConvert.DeserializeObject<ExcelExportSchema>(excelSchema.Schema);
             var type = GetDataType(excelSchema.Object);
             var data = await _excelSchemaService.GetDataWithDynamicAsync(type, schema, query);
 
-            var excelStream = _excelAdapter.Create(schema.Columns?.Select(s => new KeyValuePair<string, string>(s.Name, s.Property)).ToList(),
+            var excelStream = await _excelAdapter.CreateAsync(schema.Columns?.Select(s => new KeyValuePair<string, string>(s.Name, s.Property)).ToList(),
                                                    data);
 
             return excelStream;

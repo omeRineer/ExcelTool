@@ -22,9 +22,9 @@ namespace Services.Concrete
             Context = context;
         }
 
-        public async Task AddAsync(ExcelSchema schema)
+        public async Task AddAsync(object data)
         {
-            await Context.AddAsync(schema);
+            await Context.AddAsync(data);
         }
 
         public async Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, ExportDataQueryModel query)

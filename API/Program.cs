@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<CoreContext>(opt => opt.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=ExcelDatabase;Trusted_Connection=True;"));
 builder.Services.AddScoped<IExcelService, ExcelService>();
+builder.Services.AddScoped<IExcelSchemaService, ExcelSchemaService>();
 builder.Services.AddScoped<IExcelAdapter, OfficeOpenXmlAdapter>();
 
 builder.Services.AddControllers();

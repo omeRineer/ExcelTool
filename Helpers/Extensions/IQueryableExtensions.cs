@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Utilities.Helpers;
 
@@ -17,21 +18,22 @@ namespace Utilities.Extensions
         {
             var type = typeof(T);
             var parameter = Expression.Parameter(type, "f");
-            Expression filterQuery = null;
+            Expression condition = null;
 
-            foreach (var filterObject in queryModel.FilterObjects)
+            foreach (var filterQuery in queryModel.FilterQueries)
             {
-                var memberExpression = GetNestedPropertyExpression(parameter, filterObject.Condition);
-                var condition = CreateCondition(memberExpression, filterObject.Value, filterObject.Operator);
+                var resolvedCondition = ExpressionHelper.ResolveCondition(parameter, filterQuery.Condition);
 
-                filterQuery = filterQuery == null ? condition
-                                                  : Expression.AndAlso(filterQuery, condition);
+                if (condition == null)
+                    condition = resolvedCondition;
+                else if (condition != null && !string.IsNullOrEmpty(filterQuery.Operator))
+                    condition = ExpressionHelper.CreateBinaryExpression(condition, resolvedCondition, filterQuery.Operator);
             }
 
-            if (filterQuery == null)
+            if (condition == null)
                 return query;
 
-            var lambda = Expression.Lambda<Func<T, bool>>(filterQuery, parameter);
+            var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
 
             return query.Where(lambda);
         }
@@ -42,17 +44,17 @@ namespace Utilities.Extensions
             var parameter = Expression.Parameter(type, "o");
             IQueryable<T> orderByQuery = null;
 
-            foreach (var sortObject in queryModel.SortObjects)
+            foreach (var sortObject in queryModel.SortQueries)
             {
+                bool isFirstIndex = sortObject == queryModel.SortQueries[0];
                 var propertyInfo = ReflectionHelper.GetProperty(type, sortObject.Field);
-                var memberExpression = GetNestedPropertyExpression(parameter, sortObject.Field);
+                var memberExpression = ExpressionHelper.ResolveCondition(parameter, sortObject.Field);
                 var sortExpression = Expression.Lambda(memberExpression, parameter);
 
-                bool isFirstIndex = sortObject == queryModel.SortObjects[0];
                 string orderMethod = GetOrderMethod(sortObject.Direction, !isFirstIndex);
-                orderByQuery = ApplyOrdering(isFirstIndex ? query : orderByQuery, 
-                                             orderMethod, 
-                                             propertyInfo.Info.PropertyType, 
+                orderByQuery = ApplyOrdering(isFirstIndex ? query : orderByQuery,
+                                             orderMethod,
+                                             propertyInfo.Info.PropertyType,
                                              sortExpression);
             }
 
@@ -60,48 +62,7 @@ namespace Utilities.Extensions
         }
 
         #region Private
-        static MemberExpression GetNestedPropertyExpression(ParameterExpression parameter, string propertyPath)
-        {
-            var operators = new string[]
-            {
-                "==", "!=", ">", ">=", "<", "<="
-            };
-            var conditionItems = propertyPath.Split(new string[] { "&&", "||" }, StringSplitOptions.TrimEntries);
 
-            foreach (var conditionItem in conditionItems)
-            {
-                string[] properties = conditionItem.Split('.');
-                Expression expression = parameter;
-
-                foreach (var property in properties)
-                    expression = Expression.PropertyOrField(expression, property);
-            }
-            
-
-            return (MemberExpression)expression;
-        }
-        static Expression CreateCondition(Expression property, object value, string opr)
-        {
-            var propertyType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
-            var convertedValue = Convert.ChangeType(value, propertyType);
-            var constant = Expression.Constant(convertedValue);
-
-            var result = opr switch
-            {
-                "==" => Expression.Equal(property, constant),
-                "!=" => Expression.NotEqual(property, constant),
-                ">" => Expression.GreaterThan(property, constant),
-                ">=" => Expression.GreaterThanOrEqual(property, constant),
-                "<" => Expression.LessThan(property, constant),
-                "<=" => Expression.LessThanOrEqual(property, constant),
-                "&&" => Expression.AndAlso(property, constant),
-                "||" => Expression.Or(property, constant),
-
-                _ => throw new NotSupportedException($"Opr ({opr}) is not avaible")
-            };
-
-            return result;
-        }
         static IOrderedQueryable<T> ApplyOrdering<T>(IQueryable<T> source,
                                                       string methodName,
                                                       Type propertyType,
@@ -120,14 +81,13 @@ namespace Utilities.Extensions
 
         static string GetOrderMethod(string direction, bool isThen = false)
         {
-            if(!isThen)
-                return direction.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                                            ? "OrderBy"
-                                            : "OrderByDescending";
-            else
-                return direction.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                                            ? "ThenBy"
-                                            : "ThenByDescending";
+            return direction.ToLower() switch
+            {
+                "asc" => !isThen ? "OrderBy" : "ThenBy",
+                "desc" => !isThen ? "OrderByDescending" : "ThenByDescending",
+
+                _ => throw new NotSupportedException($"Opr ({direction}) is not supported!")
+            };
 
         }
         #endregion

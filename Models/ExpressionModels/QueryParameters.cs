@@ -8,17 +8,17 @@ namespace Models.ExpressionModels
 {
     public class QueryParameters
     {
-        public List<FilterObject>? FilterObjects { get; set; }
-        public List<SortObject>? SortObjects { get; set; }
+        public List<FilterQuery>? FilterQueries { get; set; }
+        public List<SortQuery>? SortQueries { get; set; }
     }
 
-    public class FilterObject
+    public class FilterQuery
     {
         public string Condition { get; init; }
-        public string Operator { get; init; }
+        public string? Operator { get; init; }
     }
 
-    public class SortObject
+    public class SortQuery
     {
         public string Field { get; init; }
         public string Direction { get; init; }

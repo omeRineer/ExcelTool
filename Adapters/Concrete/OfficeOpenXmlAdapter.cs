@@ -40,11 +40,11 @@ namespace Adapters.Concrete
             return dataCollection;
         }
 
-        public Stream Create(IList<KeyValuePair<string, string>> columns, IList<object> data, SchemaOptions options = null)
+        public async Task<Stream> CreateAsync(IList<KeyValuePair<string, string>> columns, IList<object> data, SchemaOptions options = null)
         {
             using (var excelPackage = new ExcelPackage())
             {
-                var sheet = excelPackage.Workbook.Worksheets.Add(options.SheetName ?? "Collection");
+                var sheet = excelPackage.Workbook.Worksheets.Add(options?.SheetName ?? "Collection");
 
                 for (int i = 1; i <= columns.Count; i++)
                 {
@@ -53,13 +53,17 @@ namespace Adapters.Concrete
                     cell.Value = columns[i - 1].Key;
                     cell.Style.Font.Bold = true;
                     cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    cell.Style.Fill.BackgroundColor.SetColor(options.CellColor ?? Color.Transparent);
+                    cell.Style.Fill.BackgroundColor.SetColor(options?.CellColor ?? Color.Transparent);
 
                     for (int j = 0; j < data.Count; j++)
                         sheet.Cells[j + 2, i].Value = ReflectionHelper.GetPropertyValue(data[j], columns[i - 1].Value);
                 }
+                
+                var memoryStream = new MemoryStream();
+                await excelPackage.SaveAsAsync(memoryStream);
+                memoryStream.Position = 0;
 
-                return excelPackage.Stream;
+                return memoryStream;
             }
         }
 
