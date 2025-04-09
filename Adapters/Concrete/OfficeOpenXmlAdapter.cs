@@ -13,7 +13,11 @@ namespace Adapters.Concrete
 {
     public class OfficeOpenXmlAdapter : IExcelAdapter
     {
-        public IList<Dictionary<string, object>> ConvertToDictionary(Stream stream)
+        public OfficeOpenXmlAdapter()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
+        public async Task<IList<Dictionary<string, object>>> ReadToDictionaryAsync(Stream stream)
         {
             var dataCollection = new List<Dictionary<string, object>>();
 

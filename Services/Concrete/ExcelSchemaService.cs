@@ -47,7 +47,7 @@ namespace Services.Concrete
             return data;
         }
 
-        public async Task<ExcelSchema> GetExcelSchemaAsync(string key)
+        public async Task<ExcelSchema?> GetExcelSchemaAsync(string key)
         {
             var schemaData = await Context.Set<ExcelSchema>().SingleAsync(f => f.Key == key);
 

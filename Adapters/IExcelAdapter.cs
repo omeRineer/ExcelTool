@@ -12,6 +12,6 @@ namespace Adapters
         Task<Stream> CreateAsync(IList<KeyValuePair<string, string>> columns, 
                       IList<object> data, 
                       SchemaOptions options = null);
-        IList<Dictionary<string, object>> ConvertToDictionary(Stream stream);
+        Task<IList<Dictionary<string, object>>> ReadToDictionaryAsync(Stream stream);
     }
 }

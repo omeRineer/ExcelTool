@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Utilities.Attributes
 {
-    public class ExcelObject : Attribute
+    [AttributeUsage(AttributeTargets.Property)]
+    public class ExcelProperty : Attribute
     {
-        public string Title { get; }
-        public ExcelObject(string title = null)
+        public ExcelProperty()
         {
-            Title = title;
+
         }
     }
 }

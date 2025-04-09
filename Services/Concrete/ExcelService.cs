@@ -31,24 +31,25 @@ namespace Services.Concrete
         readonly IExcelAdapter _excelAdapter;
         public ExcelService(IExcelSchemaService excelSchemaService, IExcelAdapter excelAdapter)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             _excelSchemaService = excelSchemaService;
             _excelAdapter = excelAdapter;
         }
 
         public async Task ImportAsync(string key, IFormFile file)
         {
-            var excelSchema = await _excelSchemaService.GetExcelSchemaAsync(key);
-            var schema = JsonConvert.DeserializeObject<ExcelImportSchema>(excelSchema.Object);
-            var type = GetDataType(excelSchema.Object);
-            var dataCollection = _excelAdapter.ConvertToDictionary(file.OpenReadStream());
-            
+            var schemaOpt = await GetSchemaAsync<ExcelImportSchema>(key);
+            Type type = GetDataType(schemaOpt.Entity.Object);            
+
+            var excelProperties = ReflectionHelper.GetProperties(type, attributeTypes: new Type[] { typeof(ExcelProperty) });
+            var dataCollection = await _excelAdapter.ReadToDictionaryAsync(file.OpenReadStream());
+
 
             foreach (var row in dataCollection)
             {
+
                 var instance = Activator.CreateInstance(type);
 
-                foreach (var column in schema.Columns)
+                foreach (var column in schemaOpt.Schema.Columns.Where(f => excelProperties.Select(s => s.FullName).Contains(f.Property)))
                 {
                     var value = ChangeType(row[column.Name], column.Type);
 
@@ -63,27 +64,42 @@ namespace Services.Concrete
 
         public async Task<Stream> ExportAsync(string key, ExportDataQueryModel query)
         {
-            var excelSchema = await _excelSchemaService.GetExcelSchemaAsync(key);
-            var schema = JsonConvert.DeserializeObject<ExcelExportSchema>(excelSchema.Schema);
-            var type = GetDataType(excelSchema.Object);
-            var data = await _excelSchemaService.GetDataWithDynamicAsync(type, schema, query);
-
-            var excelStream = await _excelAdapter.CreateAsync(schema.Columns?.Select(s => new KeyValuePair<string, string>(s.Name, s.Property)).ToList(),
+            var schemaOpt = await GetSchemaAsync<ExcelExportSchema>(key);
+            var type = GetDataType(schemaOpt.Entity.Object);
+            var excelProperties = ReflectionHelper.GetProperties(type, attributeTypes: new Type[] { typeof(ExcelProperty) });
+            var selectedColumns = schemaOpt.Schema?.Columns?.Where(f => excelProperties.Select(s => s.FullName).Contains(f.Property)).Select(s => new KeyValuePair<string, string>(s.Name, s.Property)).ToList();
+            
+            
+            var data = await _excelSchemaService.GetDataWithDynamicAsync(type, schemaOpt.Schema, query);
+            var excelStream = await _excelAdapter.CreateAsync(selectedColumns,
                                                    data);
 
             return excelStream;
         }
 
         #region Private
-        
+        private async Task<(ExcelSchema Entity, TSchema Schema)> GetSchemaAsync<TSchema>(string key)
+        {
+            ExcelSchema? schemaEntity = await _excelSchemaService.GetExcelSchemaAsync(key);
+
+            if(schemaEntity == null)
+                throw new ArgumentNullException(nameof(key));
+
+            TSchema schema = JsonConvert.DeserializeObject<TSchema>(schemaEntity.Schema);
+
+            return (schemaEntity, schema);
+        }
         private Type GetDataType(string name)
         {
-            var dataType = Assembly.Load("Entities")
-                                    .GetTypes()
-                                    .Where(f => f.GetCustomAttributes(typeof(ExcelObject), false).Length > 0)
-                                    .Single(f => f.GetCustomAttribute<ExcelObject>()?.Title == name);
+            Type? type = Assembly.Load("Entities")
+                                 .GetTypes()
+                                 .Where(f => f.GetCustomAttributes(typeof(ExcelObject), false).Length > 0)
+                                 .Single(f => f.GetCustomAttribute<ExcelObject>()?.Title == name || f.Name == name);
 
-            return dataType;
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return type;
         }
         private object? ChangeType(object value, string type)
         {

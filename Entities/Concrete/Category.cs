@@ -2,9 +2,10 @@
 
 namespace Entities.Concrete
 {
-    [ExcelObject("Category")]
+    [ExcelObject]
     public class Category : BaseEntity
     {
+        [ExcelProperty]
         public string Name { get; set; }
     }
 }

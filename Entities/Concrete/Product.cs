@@ -7,14 +7,18 @@ using System.Threading.Tasks;
 
 namespace Entities.Concrete
 {
-    [ExcelObject("Product")]
+    [ExcelObject]
     public class Product : BaseEntity
     {
         public Guid CategoryId { get; set; }
+        [ExcelProperty]
         public string Name { get; set; }
+        [ExcelProperty]
         public decimal Price { get; set; }
+        [ExcelProperty]
         public int Quantity { get; set; }
 
+        [ExcelProperty]
         public Category Category { get; set; }
     }
 }

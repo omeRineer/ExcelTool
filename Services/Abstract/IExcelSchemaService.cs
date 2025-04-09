@@ -12,7 +12,7 @@ namespace Services.Abstract
     public interface IExcelSchemaService
     {
         Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, ExportDataQueryModel query);
-        Task<ExcelSchema> GetExcelSchemaAsync(string key);
+        Task<ExcelSchema?> GetExcelSchemaAsync(string key);
         Task AddAsync(object data);
         Task SaveAsync();
     }
