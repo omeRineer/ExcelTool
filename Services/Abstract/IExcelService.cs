@@ -10,6 +10,8 @@ namespace Services.Abstract
 {
     public interface IExcelService
     {
+        Task<ExcelObjectListModel> GetExcelTypesAsync();
+        Task<ExcelPropertyListModel> GetExcelPropertiesAsync(string type);
         Task<Stream> ExportAsync(string key, ExportDataQueryModel query);
         Task ImportAsync(string key, IFormFile file);
     }

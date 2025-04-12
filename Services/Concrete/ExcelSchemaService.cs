@@ -1,5 +1,6 @@
 ﻿using Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Models.ExcelModels;
 using Models.ExcelSchemas;
 using Newtonsoft.Json;
@@ -52,6 +53,13 @@ namespace Services.Concrete
             var schemaData = await Context.Set<ExcelSchema>().SingleAsync(f => f.Key == key);
 
             return schemaData;
+        }
+
+        public async Task<List<ExcelSchema>?> GetExcelSchemaListAsync()
+        {
+            var schemaList = await Context.Set<ExcelSchema>().ToListAsync();
+
+            return schemaList;
         }
 
         public async Task SaveAsync()

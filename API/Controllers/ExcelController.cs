@@ -23,6 +23,22 @@ namespace API.Controllers
             _excelService = excelService;
         }
 
+        [HttpGet("Types")]
+        public async Task<IActionResult> Types()
+        {
+            var excelObjects = await _excelService.GetExcelTypesAsync();
+
+            return Ok(excelObjects);
+        }
+
+        [HttpGet("Properties/{type}")]
+        public async Task<IActionResult> Properties(string type)
+        {
+            var typeProperties = await _excelService.GetExcelPropertiesAsync(type);
+
+            return Ok(typeProperties);
+        }
+
         [HttpPost("Export/{key}")]
         public async Task<IActionResult> ExportAsync([FromRoute] string key, [FromBody]ExportDataQueryModel query)
         {

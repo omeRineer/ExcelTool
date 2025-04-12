@@ -13,6 +13,7 @@ namespace Services.Abstract
     {
         Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, ExportDataQueryModel query);
         Task<ExcelSchema?> GetExcelSchemaAsync(string key);
+        Task<List<ExcelSchema>?> GetExcelSchemaListAsync();
         Task AddAsync(object data);
         Task SaveAsync();
     }

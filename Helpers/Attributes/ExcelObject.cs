@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Utilities.Attributes
 {
+    [AttributeUsage(AttributeTargets.Class)]
     public class ExcelObject : Attribute
     {
         public string Title { get; }

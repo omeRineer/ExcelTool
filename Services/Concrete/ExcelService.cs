@@ -22,6 +22,7 @@ using Utilities.Extensions;
 using Entities;
 using Services.Abstract;
 using Adapters;
+using System.Xml.Linq;
 
 namespace Services.Concrete
 {
@@ -35,10 +36,54 @@ namespace Services.Concrete
             _excelAdapter = excelAdapter;
         }
 
+        public async Task<ExcelObjectListModel> GetExcelTypesAsync()
+        {
+            var schemas = await _excelSchemaService.GetExcelSchemaListAsync();
+            IEnumerable<Type> types = Assembly.Load("Entities")
+                                              .GetTypes()
+                                              .Where(f => f.GetCustomAttribute<ExcelObject>() != null);
+
+            var result = new ExcelObjectListModel
+            {
+                Objects = types.Select(s =>
+                {
+                    var title = s.GetCustomAttribute<ExcelObject>()?.Title ?? s.Name;
+
+                    return new ExcelObjectList_Item
+                    {
+                        Title = title,
+                        Schemas = schemas?.Where(s => s.Object == title)
+                                          .Select(s => s.Key)
+                                          .ToArray()
+                    };
+
+                }).ToList()
+            };
+
+            return result;
+        }
+
+        public async Task<ExcelPropertyListModel> GetExcelPropertiesAsync(string objectType)
+        {
+            Type? type = GetDataType(objectType);
+            var properties = ReflectionHelper.GetProperties(type, attributeTypes: new Type[] { typeof(ExcelProperty) });
+
+            var result = new ExcelPropertyListModel
+            {
+                Properties = properties.Select(s => new ExcelPropertyList_Item
+                {
+                    Title = s.FullName,
+                    Type = s.Info.PropertyType.Name
+                }).ToList()
+            };
+
+            return result;
+        }
+
         public async Task ImportAsync(string key, IFormFile file)
         {
             var schemaOpt = await GetSchemaAsync<ExcelImportSchema>(key);
-            Type type = GetDataType(schemaOpt.Entity.Object);            
+            Type type = GetDataType(schemaOpt.Entity.Object);
 
             var excelProperties = ReflectionHelper.GetProperties(type, attributeTypes: new Type[] { typeof(ExcelProperty) });
             var dataCollection = await _excelAdapter.ReadToDictionaryAsync(file.OpenReadStream());
@@ -65,11 +110,12 @@ namespace Services.Concrete
         public async Task<Stream> ExportAsync(string key, ExportDataQueryModel query)
         {
             var schemaOpt = await GetSchemaAsync<ExcelExportSchema>(key);
-            var type = GetDataType(schemaOpt.Entity.Object);
+            Type type = GetDataType(schemaOpt.Entity.Object);
+
             var excelProperties = ReflectionHelper.GetProperties(type, attributeTypes: new Type[] { typeof(ExcelProperty) });
             var selectedColumns = schemaOpt.Schema?.Columns?.Where(f => excelProperties.Select(s => s.FullName).Contains(f.Property)).Select(s => new KeyValuePair<string, string>(s.Name, s.Property)).ToList();
-            
-            
+
+
             var data = await _excelSchemaService.GetDataWithDynamicAsync(type, schemaOpt.Schema, query);
             var excelStream = await _excelAdapter.CreateAsync(selectedColumns,
                                                    data);
@@ -82,10 +128,10 @@ namespace Services.Concrete
         {
             ExcelSchema? schemaEntity = await _excelSchemaService.GetExcelSchemaAsync(key);
 
-            if(schemaEntity == null)
+            if (schemaEntity == null)
                 throw new ArgumentNullException(nameof(key));
 
-            TSchema schema = JsonConvert.DeserializeObject<TSchema>(schemaEntity.Schema);
+            TSchema? schema = JsonConvert.DeserializeObject<TSchema>(schemaEntity.Schema);
 
             return (schemaEntity, schema);
         }
