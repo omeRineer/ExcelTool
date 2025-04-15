@@ -1,6 +1,7 @@
 ﻿using Entities.Concrete;
+using MeArchitecture.Reporting.Data;
 using Microsoft.EntityFrameworkCore;
-using Models.ExcelModels;
+using Models.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,10 @@ namespace Services.DataBase.Context
         }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<ExcelSchema> ExcelSchemas { get; set; }
+        public DbSet<ReportSchema> ReportSchemas { get; set; }
 
-        public IQueryable<T> GetData<T>(ExportDataQueryModel queryModel, 
-                                        string[] includes) 
+        public IQueryable<T> GetDynamicQuery<T>(DynamicDataQueryModel queryModel, 
+                                                string[] includes) 
             where T : class
         {
             IQueryable<T> query = Set<T>();

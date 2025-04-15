@@ -1,11 +1,11 @@
-﻿using Utilities.Attributes;
+﻿using MeArchitecture.Reporting.Attributes;
 
 namespace Entities.Concrete
 {
-    [ExcelObject]
+    [ReportObject]
     public class Category : BaseEntity
     {
-        [ExcelProperty]
+        [ReportProperty]
         public string Name { get; set; }
     }
 }

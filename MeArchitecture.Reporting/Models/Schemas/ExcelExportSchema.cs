@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.ExcelSchemas
+namespace MeArchitecture.Reporting.Models.Schemas
 {
     public class ExcelExportSchema
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Adapters.Models
+namespace MeArchitecture.Reporting.Models.Options
 {
     public class SchemaOptions
     {

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Helpers
+namespace Core.Utilities.Helpers
 {
     public static class ReflectionHelper
     {

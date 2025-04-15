@@ -1,11 +1,10 @@
-﻿using Entities.Concrete;
+﻿using MeArchitecture.Reporting.Data;
+using MeArchitecture.Reporting.Models.Schemas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Models.ExcelModels;
-using Models.ExcelSchemas;
+using Models.Query;
 using Newtonsoft.Json;
 using OfficeOpenXml;
-using Services.Abstract;
 using Services.DataBase.Context;
 using System;
 using System.Collections.Generic;
@@ -15,10 +14,18 @@ using System.Threading.Tasks;
 
 namespace Services.Concrete
 {
-    public class ExcelSchemaService : IExcelSchemaService
+    public interface IReportSchemaService
+    {
+        Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, DynamicDataQueryModel query);
+        Task<ReportSchema> GetExcelSchemaAsync(string key);
+        Task<List<ReportSchema>?> GetExcelSchemaListAsync();
+        Task AddAsync(object data);
+        Task SaveAsync();
+    }
+    public class ReportSchemaService: IReportSchemaService
     {
         readonly CoreContext Context;
-        public ExcelSchemaService(CoreContext context)
+        public ReportSchemaService(CoreContext context)
         {
             Context = context;
         }
@@ -28,10 +35,10 @@ namespace Services.Concrete
             await Context.AddAsync(data);
         }
 
-        public async Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, ExportDataQueryModel query)
+        public async Task<List<object>> GetDataWithDynamicAsync(Type type, ExcelExportSchema excelExportShema, DynamicDataQueryModel query)
         {
             var context = Context.GetType().GetMethods()
-                                 .Where(f => f.Name == "GetData" && f.IsGenericMethod)
+                                 .Where(f => f.Name == "GetDynamicQuery" && f.IsGenericMethod)
                                  .Single()
                                  .MakeGenericMethod(type);
 
@@ -48,16 +55,16 @@ namespace Services.Concrete
             return data;
         }
 
-        public async Task<ExcelSchema?> GetExcelSchemaAsync(string key)
+        public async Task<ReportSchema?> GetExcelSchemaAsync(string key)
         {
-            var schemaData = await Context.Set<ExcelSchema>().SingleAsync(f => f.Key == key);
+            var schemaData = await Context.Set<ReportSchema>().SingleAsync(f => f.Key == key);
 
             return schemaData;
         }
 
-        public async Task<List<ExcelSchema>?> GetExcelSchemaListAsync()
+        public async Task<List<ReportSchema>?> GetExcelSchemaListAsync()
         {
-            var schemaList = await Context.Set<ExcelSchema>().ToListAsync();
+            var schemaList = await Context.Set<ReportSchema>().ToListAsync();
 
             return schemaList;
         }

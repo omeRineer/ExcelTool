@@ -1,13 +1,12 @@
-﻿using Models.ExpressionModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.ExcelModels
+namespace Models.Query
 {
-    public class ExportDataQueryModel
+    public class DynamicDataQueryModel
     {
         public QueryParameters? Filter { get; set; }
     }

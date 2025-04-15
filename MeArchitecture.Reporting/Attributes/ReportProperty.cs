@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Attributes
+namespace MeArchitecture.Reporting.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class ExcelProperty : Attribute
+    public class ReportProperty : Attribute
     {
-        public ExcelProperty()
+        public ReportProperty()
         {
 
         }

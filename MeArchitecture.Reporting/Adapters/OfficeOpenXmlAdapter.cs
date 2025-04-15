@@ -1,17 +1,19 @@
-﻿using Adapters.Models;
+﻿using Core.Utilities.Helpers;
+using MeArchitecture.Reporting.Models.Options;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Utilities.Helpers;
+using System.Xml.Linq;
 
-namespace Adapters.Concrete
+namespace MeArchitecture.Reporting.Adapters
 {
-    public class OfficeOpenXmlAdapter : IExcelAdapter
+    public class OfficeOpenXmlAdapter : IReportAdapter
     {
         public OfficeOpenXmlAdapter()
         {
@@ -44,7 +46,10 @@ namespace Adapters.Concrete
             return dataCollection;
         }
 
-        public async Task<Stream> CreateAsync(IList<KeyValuePair<string, string>> columns, IList<object> data, SchemaOptions options = null)
+        public async Task<Stream> CreateAsync<TData>(IList<KeyValuePair<string, string>> columns,
+                                                     IList<TData> data,
+                                                     SchemaOptions options = null)
+            where TData : class, new()
         {
             using (var excelPackage = new ExcelPackage())
             {
@@ -62,7 +67,7 @@ namespace Adapters.Concrete
                     for (int j = 0; j < data.Count; j++)
                         sheet.Cells[j + 2, i].Value = ReflectionHelper.GetPropertyValue(data[j], columns[i - 1].Value);
                 }
-                
+
                 var memoryStream = new MemoryStream();
                 await excelPackage.SaveAsAsync(memoryStream);
                 memoryStream.Position = 0;

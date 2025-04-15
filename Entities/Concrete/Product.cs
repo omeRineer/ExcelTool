@@ -1,24 +1,22 @@
-﻿using Utilities.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MeArchitecture.Reporting.Attributes;
 
 namespace Entities.Concrete
 {
-    [ExcelObject]
+    [ReportObject]
     public class Product : BaseEntity
     {
         public Guid CategoryId { get; set; }
-        [ExcelProperty]
+        [ReportProperty]
         public string Name { get; set; }
-        [ExcelProperty]
+        [ReportProperty]
         public decimal Price { get; set; }
-        [ExcelProperty]
+        [ReportProperty]
         public int Quantity { get; set; }
-
-        [ExcelProperty]
         public Category Category { get; set; }
     }
 }

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.Enums
+namespace MeArchitecture.Reporting.Enums
 {
-    public enum ExcelSchemaTypeEnum
+    public enum ReportSchemaType
     {
-        Import,
-        Export
+        ExcelImport,
+        ExcelExport
     }
 }

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities.Attributes
+namespace MeArchitecture.Reporting.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ExcelObject : Attribute
+    public class ReportObject : Attribute
     {
         public string Title { get; }
-        public ExcelObject(string title = null)
+        public ReportObject(string title = null)
         {
             Title = title;
         }

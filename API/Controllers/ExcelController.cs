@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 using OfficeOpenXml;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using Models.ExcelModels;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Services.Abstract;
+using Models.Query;
+using Services.Concrete;
 
 namespace API.Controllers
 {
@@ -16,35 +16,35 @@ namespace API.Controllers
     [ApiController]
     public class ExcelController : ControllerBase
     {
-        readonly IExcelService _excelService;
+        readonly IReportService _excelService;
 
-        public ExcelController(IExcelService excelService)
+        public ExcelController(IReportService excelService)
         {
             _excelService = excelService;
         }
 
-        [HttpGet("Types")]
-        public async Task<IActionResult> Types()
-        {
-            var excelObjects = await _excelService.GetExcelTypesAsync();
+        //[HttpGet("Types")]
+        //public async Task<IActionResult> Types()
+        //{
+        //    var excelObjects = await _excelService.GetExcelTypesAsync();
 
-            return Ok(excelObjects);
-        }
+        //    return Ok(excelObjects);
+        //}
 
-        [HttpGet("Properties/{type}")]
-        public async Task<IActionResult> Properties(string type)
-        {
-            var typeProperties = await _excelService.GetExcelPropertiesAsync(type);
+        //[HttpGet("Properties/{type}")]
+        //public async Task<IActionResult> Properties(string type)
+        //{
+        //    var typeProperties = await _excelService.GetExcelPropertiesAsync(type);
 
-            return Ok(typeProperties);
-        }
+        //    return Ok(typeProperties);
+        //}
 
         [HttpPost("Export/{key}")]
-        public async Task<IActionResult> ExportAsync([FromRoute] string key, [FromBody]ExportDataQueryModel query)
+        public async Task<IActionResult> ExportAsync([FromRoute] string key, [FromBody]DynamicDataQueryModel query)
         {
             var file = await _excelService.ExportAsync(key, query);
 
-            return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key} List.xlsx");
+            return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key}.xlsx");
         }
 
         [HttpPost("Import/{key}")]

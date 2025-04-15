@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.Concrete
+namespace MeArchitecture.Reporting.Data
 {
-    public class ExcelSchema : BaseEntity
+    public class ReportSchema
     {
+        public Guid Id { get; set; } 
         public string Object { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
